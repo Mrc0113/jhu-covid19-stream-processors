@@ -5,12 +5,12 @@ spring:
         bindings:
           onCovid19USConfirmedUpdate-in-0:
             consumer:
-              queueAdditionalSubscriptions: jhu/csse/covid19/cases/confirmed/update/US/*
+              queueAdditionalSubscriptions: jhu/csse/covid19/test/cases/confirmed/update/US/*
       function:
         definition: onCovid19USConfirmedUpdate
       bindings:
         onCovid19USConfirmedUpdate-in-0:
-          destination: jhu/csse/covid19/cases/confirmed/update/US
+          destination: jhu/csse/covid19/test/cases/confirmed/update/US
 solace:
   java:
     host: ${host:tcp://localhost:55555}

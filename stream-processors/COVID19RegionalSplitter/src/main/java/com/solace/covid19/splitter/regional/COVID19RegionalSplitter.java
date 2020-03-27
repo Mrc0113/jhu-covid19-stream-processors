@@ -24,50 +24,56 @@ import static com.solace.covid19.data.models.COVID19Utilities.cloneFeature;
 @SpringBootApplication
 public class COVID19RegionalSplitter {
 
-    private static final Logger logger = LoggerFactory.getLogger(COVID19RegionalSplitter.class);
-    @Autowired
-    private JmsTemplate jmsTemplate = null;
-    private ObjectMapper mapper = new ObjectMapper();
-    private Map<String, RawJHUCSSUCOVID19.Features> updateMap = new HashMap<String, RawJHUCSSUCOVID19.Features>();
-    private String topicPrefix = "jhu/csse/covid19/cases/region/update/";
+	private static final Logger logger = LoggerFactory.getLogger(COVID19RegionalSplitter.class);
+	@Autowired
+	private JmsTemplate jmsTemplate = null;
+	private ObjectMapper mapper = new ObjectMapper();
+//    private Map<String, RawJHUCSSUCOVID19.Features> updateMap = new HashMap<String, RawJHUCSSUCOVID19.Features>();
+	private String topicPrefix = "jhu/csse/covid19/test/cases/region/update/";
+	private int messageCount = 0;
 
-    public static void main(String[] args) {
-        SpringApplication app = new SpringApplication(COVID19RegionalSplitter.class);
-        app.setDefaultProperties(Collections
-                .singletonMap("server.port", "8083"));
-        app.run(args);
-    }
+	public static void main(String[] args) {
+		SpringApplication app = new SpringApplication(COVID19RegionalSplitter.class);
+		app.setDefaultProperties(Collections.singletonMap("server.port", "8083"));
+		app.run(args);
+	}
 
-    @Bean
-    public Consumer<RawJHUCSSUCOVID19> onCovidRawDataRegion() {
+	@Bean
+	public Consumer<RawJHUCSSUCOVID19> onCovidRawDataRegion() {
 		// Add business logic here.
 		return rawJHUCSSUCOVID19 -> {
-			for (RawJHUCSSUCOVID19.Features feature : rawJHUCSSUCOVID19.getFeatures()) {
-				String key = topicPrefix + feature.getAttributes().getCountryRegion() + "/" + feature.getAttributes().getProvinceState();
-                if(feature.getAttributes().getLastUpdate() != null) {
-                    if (!updateMap.containsKey(key) || updateMap.get(key).getAttributes().getLastUpdate().compareTo(feature.getAttributes().getLastUpdate()) != 0) {
+			messageCount++;
+			if (messageCount % 3 == 0) {
+				for (RawJHUCSSUCOVID19.Features feature : rawJHUCSSUCOVID19.getFeatures()) {
+					String key = topicPrefix + feature.getAttributes().getCountryRegion() + "/"
+							+ feature.getAttributes().getProvinceState();
+					if (feature.getAttributes().getLastUpdate() != null) {
+//                    if (!updateMap.containsKey(key) || updateMap.get(key).getAttributes().getLastUpdate().compareTo(feature.getAttributes().getLastUpdate()) != 0) {
 
-                        try {
-                            jmsTemplate.convertAndSend(key, mapper.writeValueAsString(cloneFeature(feature)));
-                        } catch (JsonProcessingException e) {
-                            logger.error(e.getMessage());
-                        }
-                        updateMap.put(key, feature);
-                        logger.info("Publishing: " + key);
-                    }
-                }
+						try {
+							jmsTemplate.convertAndSend(key, mapper.writeValueAsString(cloneFeature(feature)));
+						} catch (JsonProcessingException e) {
+							logger.error(e.getMessage());
+						}
+//                        updateMap.put(key, feature);
+						logger.info("Publishing: " + key);
+//                    }
+					}
+				}
+			}
+			else {
+				logger.info("Skipping this message");
 			}
 		};
 	}
 
-    @PostConstruct
-    private void fixJMSTemplate() {
-        // Code that makes the JMS Template Cache Connections for Performance.
-        CachingConnectionFactory ccf = new CachingConnectionFactory();
-        ccf.setTargetConnectionFactory(jmsTemplate.getConnectionFactory());
-        jmsTemplate.setConnectionFactory(ccf);
-        jmsTemplate.setPubSubDomain(true);
-        jmsTemplate.setTimeToLive(24*60*60*1000);
-    }
+	@PostConstruct
+	private void fixJMSTemplate() {
+		// Code that makes the JMS Template Cache Connections for Performance.
+		CachingConnectionFactory ccf = new CachingConnectionFactory();
+		ccf.setTargetConnectionFactory(jmsTemplate.getConnectionFactory());
+		jmsTemplate.setConnectionFactory(ccf);
+		jmsTemplate.setPubSubDomain(true);
+		jmsTemplate.setTimeToLive(24 * 60 * 60 * 1000);
+	}
 }
-

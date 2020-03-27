@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>COVID19PopulationProvider</artifactId>
+    <artifactId>COVID19PopulationProviderTester</artifactId>
     <dependencies>
         <dependency>
             <groupId>com.solace.covid19.processors</groupId>

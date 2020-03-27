@@ -33,7 +33,7 @@ public class COVID19PopulationProvider {
     @Autowired
     private JmsTemplate jmsTemplate = null;
     private ObjectMapper mapper = new ObjectMapper();
-    private String topicPrefix = "jhu/csse/covid19/cases/active/population/update/US/";
+    private String topicPrefix = "jhu/csse/covid19/test/cases/active/population/update/US/";
 
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(COVID19PopulationProvider.class);
