@@ -11,8 +11,9 @@ Table of Contents
             * [Streams are available on these topics](#streams-are-available-on-these-topics)
             * [Example topic subscription](#example-topic-subscription)
          * [3. Create your application](#3-create-your-application)
-            * [Sample Applications](#sample-applications)
+            * [Sample Applications](#sample-applications-to-get-started-quickly)
             * [COVID19 Stream Processors](#covid19-stream-processors)
+      * [Test Topics](#test-topics)
       * [Contribution](#contribution)
       * [Disclaimer](#disclaimer)
 
@@ -58,21 +59,24 @@ Note: if you want to receive notifications via a REST end point that supports `P
 #### Streams are available on these topics
 As of right now, the following is the list of streams available for consumption 
 
-| Topic |  Schema| Description| Notes
+|  Description| Schema| Topic| Notes
 | ---- |----|-------| --- |
-|`jhu/csse/covid19/raw`| [Raw Data Schema](./schemas/RawJHUCSSUCOVID19.json) | Raw data for all countries published every ~45 seconds |
-|`jhu/csse/covid19/cases/region/update/{attributes.countryRegion}/{attributes.provinceState}`| [Regional Update Schema](./schemas/COVID19UpdateSchema.json) | Active/Deaths/Confirmed/Recovered for a region/state in one event | |
-|`jhu/csse/covid19/cases/deaths/update/{attributes.countryRegion}/{attributes.provinceState}`| [Update Type Schema](./schemas/COVID19UpdateTypeSchema.json) | Deaths for a region/state | |
-|`jhu/csse/covid19/cases/active/update/{attributes.countryRegion}/{attributes.provinceState}`| [Update Type Schema](./schemas/COVID19UpdateTypeSchema.json) | Active cases for a region/state | |
-|`jhu/csse/covid19/cases/confirmed/update/{attributes.countryRegion}/{attributes.provinceState}`| [Update Type Schema](./schemas/COVID19UpdateTypeSchema.json) | Confirmed cases for a region/state | |
-|`jhu/csse/covid19/cases/recovered/update/{attributes.countryRegion}/{attributes.provinceState}`| [Update Type Schema](./schemas/COVID19UpdateTypeSchema.json) | Recovered cases for a region/state | |
-|`jhu/csse/covid19/cases/active/population/update/US/{attributes.provinceState}`| [Update Population Schema](./schemas/COVID19UpdatePopulationStats.json) | Shows the percentage of the population affected | Only US for now |
+| Raw data for all countries published every ~45 seconds |[Raw Data Schema](./schemas/RawJHUCSSUCOVID19.json) | `jhu/csse/covid19/raw`| |
+| Updated Active/Deaths/Confirmed/Recovered for a region/state in one event | [Regional Update Schema](./schemas/COVID19UpdateSchema.json) | `jhu/csse/covid19/cases/region/update/{attributes.countryRegion}/{attributes.provinceState}`| |
+| Updated Deaths for a region/state | [Update Type Schema](./schemas/COVID19UpdateTypeSchema.json) | `jhu/csse/covid19/cases/deaths/update/{attributes.countryRegion}/{attributes.provinceState}`| |
+| Updated Active cases for a region/state | [Update Type Schema](./schemas/COVID19UpdateTypeSchema.json) | `jhu/csse/covid19/cases/active/update/{attributes.countryRegion}/{attributes.provinceState}`| |
+| Updated Confirmed cases for a region/state | [Update Type Schema](./schemas/COVID19UpdateTypeSchema.json) | `jhu/csse/covid19/cases/confirmed/update/{attributes.countryRegion}/{attributes.provinceState}`| |
+| Updated Recovered cases for a region/state |[Update Type Schema](./schemas/COVID19UpdateTypeSchema.json) |  `jhu/csse/covid19/cases/recovered/update/{attributes.countryRegion}/{attributes.provinceState}`| |
+| Shows the updated percentage of the population affected | [Update Population Schema](./schemas/COVID19UpdatePopulationStats.json) | `jhu/csse/covid19/cases/active/population/update/US/{attributes.provinceState}`|Only US for now |
 
-Subscribe to one or more of the available topics above to receive the required data. For more more information on using topic wildcards check out [SMF Topic Subscriptions](https://docs.solace.com/PubSub-Basics/Wildcard-Charaters-Topic-Subs.htm) and [MQTT Topic Subscriptions](https://docs.solace.com/Open-APIs-Protocols/MQTT/MQTT-Topics.htm#Wildcard)
+Subscribe to one or more of the available topics above to receive the required data. 
+**Note that the streams defined as *update* above only send events when updates actually occur which can be infrequently. For development purposes we are providing [test topics](#test-topics) that get published every few minutes**
 
-Note: If you have your own COVID-19 event stream that you'd like to share please contact us at covid19@solace.com
+For more more information on using topic wildcards check out [SMF Topic Subscriptions](https://docs.solace.com/PubSub-Basics/Wildcard-Charaters-Topic-Subs.htm) and [MQTT Topic Subscriptions](https://docs.solace.com/Open-APIs-Protocols/MQTT/MQTT-Topics.htm#Wildcard)
 
-#### Example topic subscription
+Note: If you have your own COVID-19 event stream that you'd like to share please contact us at covid19-project@solace.com
+
+#### Example topic subscriptions
 Subscribing to the following streams will give you the corresponding results:
 
 | Subscription        | Result   
@@ -85,28 +89,49 @@ Subscribing to the following streams will give you the corresponding results:
 |`jhu/csse/covid19/cases/deaths/update/Brazil/*`|All deaths in Brazil (Note: country with no province/state)|
 |`jhu/csse/covid19/cases/*/update/Diamond Princess/*`|All case types from the Diamond Princess cruise ship|
 
+
+
 ### 3. Create your application
 After connecting and choosing the topics to listen on, its time to build your application. Check out the examples below for applications that consume the streams
 
-#### Sample Applications to Get Started Quickly (Coming Soon!)
+#### Sample Applications to Get Started Quickly
 | Application | Language | Description
 | ---- | ---| --- |
+| [Spring Cloud Stream Sample](./samples/SpringCloudStreamSample) | Java + Spring | This microservices shows how to consume events using the Spring Cloud Stream project which abstracts the messaging APIs from the developer and allows them to focus on implementing their business logic.
+| [JavaScript Sample](./samples/JavaScriptSample)| JavaScript | This html page allows you to test out multiple topics and view the stream body response
 
 #### COVID19 Stream Processors
 Below are Spring Boot microservices that are being used to create the event current streams that are available for consumption. They are also good examples if you would like to consume the streams and republish them into an event broker. Note that they are not intended to be run with the provided credentials as we are running them as a services
 
 | Application        | Version           | Integration  | Description |
 | ------------- |:-------------:| :-----| :-----|
-| [COVID19CaseSplitter](./samples/COVID19CaseSplitter)      | 0.1 | Spring | This application consumes RAW JHU COVID19 data, and publishes smaller updates |
-| [COVID19RegionalSplitter](./samples/COVID19RegionalSplitter) | 0.1      |    Spring | This application consumes RAW JHU COVID19 data, splits it into regional updates and publishes smaller regional updates
-| [COVID19PopulationProvider](./samples/COVID19PopulationProvider)     | 0.1      |   Spring | This application publishes the percentage of population affected in the areas
+| [COVID19CaseSplitter](./stream-processors/COVID19CasesSplitter)      | 0.1 | Spring | This application consumes RAW JHU COVID19 data, and publishes smaller updates |
+| [COVID19RegionalSplitter](./stream-processors/COVID19RegionalSplitter) | 0.1      |    Spring | This application consumes RAW JHU COVID19 data, splits it into regional updates and publishes smaller regional updates
+| [COVID19PopulationProvider](./stream-processors/COVID19PopulationProvider)     | 0.1      |   Spring | This application publishes the percentage of population affected in the areas
 
 ![EventPortal](./img/EventPortal.png)
 
 Note: Contact us at covid19-project@solace.com to add more event stream into the current broker
 
+## Test Topics
+This section includes information about test streams that are available. Since actual updates can occur infrequently we are providing these test streams strictly for development purposes. Instead of only receiving events when updates occur, these topics, which include `test` as a level, will regularly receive events whether or not an update has actually occurred. Once you have completed development you should remove the `test` level from your topic and you’ll only receive events when actual updates occur.
+
+|  Description| Schema| Topic| Notes
+| ---- |----|-------| --- |
+| Updated Active/Deaths/Confirmed/Recovered for a region/state in one event | [Regional Update Schema](./schemas/COVID19UpdateSchema.json) | `jhu/csse/covid19/test/cases/region/update/{attributes.countryRegion}/{attributes.provinceState}`| |
+| Updated Deaths for a region/state | [Update Type Schema](./schemas/COVID19UpdateTypeSchema.json) | `jhu/csse/covid19/test/cases/deaths/update/{attributes.countryRegion}/{attributes.provinceState}`| |
+| Updated Active cases for a region/state | [Update Type Schema](./schemas/COVID19UpdateTypeSchema.json) | `jhu/csse/covid19/test/cases/active/update/{attributes.countryRegion}/{attributes.provinceState}`| |
+| Updated Confirmed cases for a region/state | [Update Type Schema](./schemas/COVID19UpdateTypeSchema.json) | `jhu/csse/covid19/test/cases/confirmed/update/{attributes.countryRegion}/{attributes.provinceState}`| |
+| Updated Recovered cases for a region/state |[Update Type Schema](./schemas/COVID19UpdateTypeSchema.json) |  `jhu/csse/covid19/test/cases/recovered/update/{attributes.countryRegion}/{attributes.provinceState}`| |
+| Shows the updated percentage of the population affected | [Update Population Schema](./schemas/COVID19UpdatePopulationStats.json) | `jhu/csse/covid19/test/cases/active/population/update/US/{attributes.provinceState}`|Only US for now |
+
+**Note that the `raw` stream is regulary updated every ~45 seconds**
+
 ## Contribution
 See [Contribution guidelines](./CONTRIBUTING.md) form more details
+
+## Credit
+* Social Preview Image by [Gerd Altmann](https://pixabay.com/users/geralt-9301/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=3513216) from [Pixabay](https://pixabay.com/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=3513216)
 
 ## Disclaimer
 1. As per Johns Hopkins University [Terms of Use](https://github.com/CSSEGISandData/COVID-19) this data is public strictly for educational and academic research purposes.
